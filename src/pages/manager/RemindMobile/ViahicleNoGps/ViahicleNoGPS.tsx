@@ -208,7 +208,7 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
           pagination: {},
         }}
       >
-        {viahicles.map((item: any) => {
+        {viahicles.map((item: any,index:number) => {
           return (
             <div
               onClick={() => {
@@ -223,6 +223,7 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
               onTouchEnd={handleTouchEnd}
             >
               <CardCar
+                key={index}
                 weight=""
                 isGPS={false}
                 {...item}

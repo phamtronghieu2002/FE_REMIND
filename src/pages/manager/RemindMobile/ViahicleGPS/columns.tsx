@@ -32,7 +32,9 @@ const getColumnViahicleGPS = (
       key: "icons",
       render(value, record, index) {
         return {
-          children: record?.reminds?.map((icon: any) => <span> {icon}</span>),
+          children: record?.reminds?.map((icon: any, index: number) => (
+            <span key={index}> {icon}</span>
+          )),
         }
       },
     },
@@ -41,24 +43,22 @@ const getColumnViahicleGPS = (
       dataIndex: "setting",
       key: "setting",
       render(value, record, index) {
-        return {
-          children: (
-            <DrawViahicle
-              data={record}
-              title="Cài đặt nhắc nhở xe"
-              button={
-                <Button
-                  icon={<SettingOutlined />}
-                  onClick={() => {
-                    setViahicleSelect([record])
-                  }}
-                >
-                  {/* Cài đặt */}
-                </Button>
-              }
-            />
-          ),
-        }
+        return (
+          <DrawViahicle
+            data={record}
+            title="Cài đặt nhắc nhở xe"
+            button={
+              <Button
+                icon={<SettingOutlined />}
+                onClick={() => {
+                  setViahicleSelect([record])
+                }}
+              >
+                {/* Cài đặt */}
+              </Button>
+            }
+          />
+        )
       },
     },
   ]

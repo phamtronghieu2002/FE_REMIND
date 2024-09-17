@@ -181,6 +181,7 @@ const ViahicleGPS: FC<ViahicleGPSType> = ({ viahicles }) => {
             className="item-container"
           >
             <CardCar
+             key={index}
               isGPS
               {...item}
               showCheckbox={showCheckbox} // Hiển thị checkbox khi người dùng nhấn giữ và thả chuột

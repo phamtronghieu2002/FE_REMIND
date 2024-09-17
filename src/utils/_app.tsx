@@ -6,6 +6,7 @@ import { IMRealTime, IVehicleRealTime } from "../_types/deviceType"
 import { IDriver } from "../_types/driverType"
 import { IServerMenu } from "../_types/interfaceType"
 import { IUserInfo } from "../_types/userType"
+import { removeFirebaseToken } from "../apis/firebaseAPI"
 import { store } from "../app/store"
 import { routeConfig } from "../configs/routeConfig"
 import { Coppy } from "../conponents/Coppy"
@@ -53,11 +54,19 @@ type REALTIME_PROMISE_DATA = "gps" | "info" | "alarm"
 
 export const _app = {
   logout: async () => {
-    logoutService().finally(() => {
-      storage.clearToken?.()
-      window.location.href = routeConfig?.login
-      // history.navigate?.(routeConfig?.login)
-    })
+    removeFirebaseToken()
+      .then((res) => {
+        storage?.remove?.("fcmToken")
+        logoutService().then(() => {
+          storage.clearToken?.()
+          window.location.href = routeConfig?.login
+        })
+      })
+      .catch((e) => {
+        console.log("====================================")
+        console.log("error", e)
+        console.log("====================================")
+      })
   },
 
   cameraFrame: {
@@ -230,7 +239,6 @@ export const _app = {
 
       try {
         fetchFCM()
-        
       } catch (error) {
         console.log("====================================")
         console.log("error", error)

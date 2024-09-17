@@ -177,7 +177,16 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         setLoading(true)
         const res = await getCategory()
         setLoading(false)
-        setCategories(res?.data)
+
+    if ((viahicleSelected?.length ?? 0) > 1) {
+         
+          const newRes = res?.data.filter((item: CategoryType) => {
+            return item.id != 6
+          })
+          setCategories(newRes)
+        } else {
+          setCategories(res?.data)
+        }
       } catch (error) {
         setLoading(false)
         api.message?.error("Lỗi khi lấy dữ liệu loại nhắc nhở")
@@ -200,7 +209,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           })
         } else {
           // cộng thêm n tháng
-          initialValues.expiration_time = moment(
+          initialValues.expiration_time = dayjs(
             initialValues?.expiration_timeStamp,
           ).add(isUpdateCycleForm ? initialValues?.cycle : 0, "months")
 

@@ -13,13 +13,16 @@ import "animate.css"
 import { useEffect, useState } from "react"
 import { requestFCMToken, onMessageListener } from "./utils/firebase"
 import { addFirebaseToken } from "./apis/firebaseAPI"
+import storage from "./utils/storage"
 
 export const fetchFCM = async () => {
   try {
     const data: any = await requestFCMToken()
-    console.log("token fireabase >>> ", data)
-    if(data) await addFirebaseToken(data)
-    
+
+    if (data) {
+      await addFirebaseToken(data)
+  
+    }
   } catch (error) {
     console.log(error)
   }

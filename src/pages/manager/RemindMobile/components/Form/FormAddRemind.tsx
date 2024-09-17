@@ -35,18 +35,13 @@ import { log } from "console"
 import { getTimeRemind } from "../../../../../apis/remindAPI"
 import { MaskLoader } from "../../../../../conponents/Loader"
 
-import { FilePond, registerPlugin } from "react-filepond"
-import "filepond/dist/filepond.min.css"
-import FilePondPluginImagePreview from "filepond-plugin-image-preview"
-import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
-import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type"
 import { _log } from "../../../../../utils/_log"
-import exp from "constants"
+
 import dayjs from "dayjs"
+
 const SERVER_DOMAIN_REMIND = import.meta.env.VITE_HOST_REMIND_SERVER_DOMAIN_IMG
 
 // Đăng ký plugin
-registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType)
 
 interface FormAddRemindProps {
   isUpdateCycleForm?: boolean
@@ -78,68 +73,72 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
     const buttonDateRef = useRef<HTMLButtonElement>(null)
 
     const [randomKey, setRandomKey] = useState<number>(Math.random())
-    const [imageFiles, setImageFiles] = useState<any[]>([])
     const [schedules, setSchedules] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(false)
-    const [imageFilesUrl, setImageFilesUrl] = useState<any[]>([])
     const [form] = Form.useForm()
+
+    const [imageFiles, setImageFiles] = useState<any[]>([])
+    const [fileList, setFileList] = useState<any[]>([])
+    const [previewImage, setPreviewImage] = useState<string | null>(null) // State for the preview image
     const initImageURL = initialValues?.remind_img_url || initialValues?.img_url
-    const convertUrlsToFiles = async (urls: string[]) => {
-      return Promise.all(
-        urls.map(async (url) => {
-          const response = await fetch(url)
-          const blob = await response.blob()
-          const file = new File([blob], url.split("/").pop() || "file", {
-            type: blob.type,
-          })
-          console.log("====================================")
-          console.log("url ne cac ban >>", url)
-          console.log("====================================")
-          return {
-            source: url,
-            options: {
-              type: "local",
-              file: file,
-            },
-          }
-        }),
-      )
+
+    // xử lí fill hình ảnh
+    const createFileFromUrl = async (url: string, name: string) => {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      return new File([blob], name, { type: blob.type })
     }
 
-    _log("initialValues >>", initialValues)
-    // xử lí fill hình ảnh
-
+    // Handle filling images from server URLs
     useEffect(() => {
       if (initImageURL) {
-        const loading = async () => {
-          const urls = initImageURL?.split(",")?.map(
-            (url: string, index: number) =>
-              `${SERVER_DOMAIN_REMIND}${url.trim()}`, // The URL of the image
-          )
-          const files = await convertUrlsToFiles(urls)
-          setImageFilesUrl(files)
-        }
-        loading()
+        // Get the URLs of the images
+        const urls = initImageURL.split(",").map((url: string) => {
+          const trimmedUrl = `${SERVER_DOMAIN_REMIND}${url.trim()}`
+          const name = trimmedUrl.split("/").pop() || "image.jpg" // Default name if extraction fails
+
+          return {
+            uid: trimmedUrl, // unique id for each image
+            name: name,
+            status: "done",
+            url: trimmedUrl,
+          }
+        })
+
+        // Update fileList state
+        setFileList(urls)
+
+        // Create File objects and set imageFiles (append existing ones)
+        Promise.all(
+          urls.map(async ({ url, name }: { url: string; name: string }) => {
+            const file = await createFileFromUrl(url, name)
+            return file
+          }),
+        ).then((files) => {
+          setImageFiles(files) // Initialize imageFiles with files from URLs
+        })
       }
-    }, [initImageURL])
+    }, [initImageURL]) // Run when initImageURL changes
 
-    useEffect(() => {
-      if (initImageURL) {
-        const urls = initImageURL?.split(",")?.map(
-          (url: string, index: number) =>
-            `${SERVER_DOMAIN_REMIND}${url.trim()}`, // The URL of the image
+    // Handle image upload and preview
+    const handleChange = (info: any) => {
+      const newFileList = info.fileList
+      setFileList(newFileList)
+
+      // Get only the new files (files that are not in imageFiles yet)
+      const newFiles = newFileList
+        .filter(
+          (file: any) =>
+            !imageFiles.some((imgFile: any) => imgFile.name === file.name),
         )
+        .map((file: any) => file.originFileObj)
+        .filter(Boolean)
 
-        const loadImageFiles = async () => {
-          const files = await convertUrlsToFiles(urls)
-          setImageFiles(files)
-        }
-
-        loadImageFiles()
-
-        // tôi có links các url làm sao fill preview ngược lại filepond
+      if (newFiles.length > 0) {
+        setImageFiles((prev) => [...prev, ...newFiles]) // Append only new files
       }
-    }, [imageFiles?.length])
+    }
+
     // xử lí fill thời gian
     useEffect(() => {
       const fetchTime = async (id: number) => {
@@ -178,7 +177,16 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         setLoading(true)
         const res = await getCategory()
         setLoading(false)
-        setCategories(res?.data)
+  
+   
+        if ((viahicleSelected?.length ?? 0) > 1) {
+          const newRes = res?.data.filter((item: CategoryType) => {
+            return item.id != 6
+          })
+          setCategories(newRes)
+        } else {
+          setCategories(res?.data)
+        }
       } catch (error) {
         setLoading(false)
         api.message?.error("Lỗi khi lấy dữ liệu loại nhắc nhở")
@@ -201,7 +209,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           })
         } else {
           // cộng thêm n tháng
-          initialValues.expiration_time = moment(
+          initialValues.expiration_time = dayjs(
             initialValues?.expiration_timeStamp,
           ).add(isUpdateCycleForm ? initialValues?.cycle : 0, "months")
 
@@ -273,7 +281,9 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
       )
       setViahicleTire(viahicle)
     }
-
+    console.log("====================================")
+    console.log("imageFiles", imageFiles)
+    console.log("====================================")
     const handleSelectTypeRemind = (value: any) => {
       if (value === "khác") {
         setIsName(true)
@@ -298,19 +308,27 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         setIsTireSelect(false)
       }
     }
+    const beforeUpload = (file: any) => {
+      const isImage = file.type.startsWith("image/")
+      if (!isImage) {
+        Modal.error({
+          title: "chỉ cho phép tải ảnh !",
+        })
+        return Upload.LIST_IGNORE; // Ngăn kh
+      }
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isLt2M) {
+        Modal.error({
+          title: 'Kích thước ảnh phải dưới 2MB!',
+        });
+        return Upload.LIST_IGNORE; // Ngăn không cho tải file lớn hơn 2MB
+      }
+    
+    
+      return isImage
+    }
 
     // Hàm xử lý khi ảnh được chọn
-    const handleImageUpload = (file: any, action: string) => {
-      if (action === "add") {
-        const formData = new FormData()
-        formData.append("images", file)
-        setImageFiles((prev) => [...prev, { name: file.name, data: formData }])
-      } else if (action === "remove") {
-        setImageFiles((prev) => prev.filter((item) => item.name !== file.name))
-      }
-
-      return false
-    }
 
     const handleGetDataForm = () => {
       buttonDateRef.current?.click()
@@ -546,37 +564,46 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           {/* đoạn này nè */}
 
           {/* Upload ảnh */}
-          <Form.Item label="Tải lên hình ảnh" style={{ gap: 10 }}>
-            <FilePond
-              imagePreviewHeight={200} // Chiều cao của ảnh preview
-              imagePreviewMaxHeight={200} // Chiều cao tối đa của ảnh preview
-              files={imageFilesUrl.length > 0 ? imageFilesUrl : imageFiles}
-              allowMultiple={true}
-              maxFiles={5}
-              onupdatefiles={(fileItems) => {
-                // nếu file lỗi thì tự động xóa
-                if (fileItems.filter((file: any) => file.error).length > 0) {
-                  setImageFiles([])
-                }
+          <Form.Item label="Tải ảnh">
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleChange}
+              beforeUpload={beforeUpload}
+              onPreview={(file: any) => {
+                setPreviewImage(file.url) // Set the preview image
               }}
-              acceptedFileTypes={["image/*"]}
-              name="images"
-              labelIdle='Kéo thả hình hoặc<span class="filepond--label-action">       Chọn </span>'
-              onaddfile={(error, fileItem) => {
-                if (!error) {
-                  handleImageUpload(fileItem.file, "add") // Handle add action
-                }
+              onRemove={(file: any) => {
+                const newFileList = fileList.filter(
+                  (item: any) => item.uid !== file.uid,
+                )
+                setFileList(newFileList)
+
+                // Cập nhật `imageFiles` sau khi xóa
+                const updatedImageFiles = imageFiles.filter(
+                  (imgFile: any) => imgFile.name !== file.name,
+                )
+           
+                setImageFiles(updatedImageFiles)
               }}
-              onremovefile={(error, fileItem) => {
-                if (!error) {
-                  handleImageUpload(fileItem.file, "remove")
-                  // Handle remove action
-                } else {
-                  console.log("error:", error)
-                }
-              }}
-            />
+            >
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Ảnh</div>
+              </div>
+            </Upload>
           </Form.Item>
+
+          {/* Preview modal */}
+          {previewImage && (
+            <Modal
+              visible={!!previewImage}
+              footer={null}
+              onCancel={() => setPreviewImage(null)}
+            >
+              <img alt="preview" style={{ width: "100%" }} src={previewImage} />
+            </Modal>
+          )}
 
           <Form.Item name="note_repair" label="Nội dung">
             <TextArea />

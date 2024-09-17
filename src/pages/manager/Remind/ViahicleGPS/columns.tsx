@@ -20,12 +20,7 @@ const getColumnViahicleGPS = (
       key: "licenseNumber",
       sorter: (a, b) => a.license_plate.localeCompare(b.license_plate),
     },
-    {
-      title: "SĐT",
-      dataIndex: "license",
-      key: "license",
-      sorter: (a, b) => a.license.localeCompare(b.license),
-    },
+
     {
       title: "Họ tên",
       dataIndex: "user_name",

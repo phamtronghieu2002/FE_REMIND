@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { addFirebaseToken } from "../apis/firebaseAPI";
+import storage from "./storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA4YJJ7iTzp6JaDs5T1M1lBAHbKxeFwFfo",
@@ -40,8 +41,10 @@ export const requestFCMToken = async () => {
         console.log('====================================');
         console.log("Token firebase >>>>: ", token);
         console.log('====================================');
-
+        storage.setItem("fcmToken", token);
         await addFirebaseToken(token);
+
+
         return token
       } else {
         console.log("Unable to get permission to notify.");

@@ -23,6 +23,7 @@ import moment from "moment"
 import { getTokenParam } from "../../utils/_param"
 import storage from "../../utils/storage"
 interface ModalCreateRemindProps {
+  remindId?: string
   remindData?: any
   button: React.ReactNode
   isShow?: boolean
@@ -217,6 +218,7 @@ const Form: FC<{
 }
 
 const ModalCreateRemind: FC<ModalCreateRemindProps> = ({
+  remindId,
   isShow = false,
   button,
   onReload,
@@ -232,21 +234,21 @@ const ModalCreateRemind: FC<ModalCreateRemindProps> = ({
     return typeof value === "number" && value > 1000000000
   }
 
-  const convertTimestampsToMoment = (data: any) => {
-    const convertedData = { ...data }
+  // const convertTimestampsToMoment = (data: any) => {
+  //   const convertedData = { ...data }
 
-    Object.keys(convertedData).forEach((key) => {
-      if (isTimestamp(convertedData[key])) {
-        // Chỉ chuyển đổi nếu là timestamp và cộng thêm 7 tiếng
-        convertedData[key] = moment(convertedData[key]).add(
-          convertedData?.time_before,
-          "months",
-        )
-      }
-    })
+  //   Object.keys(convertedData).forEach((key) => {
+  //     if (isTimestamp(convertedData[key])) {
+  //       // Chỉ chuyển đổi nếu là timestamp và cộng thêm 7 tiếng
+  //       convertedData[key] = moment(convertedData[key]).add(
+  //         convertedData?.time_before,
+  //         "months",
+  //       )
+  //     }
+  //   })
 
-    return convertedData
-  }
+  //   return convertedData
+  // }
 
   const getAction = () => {
     if (type === "add") {
@@ -277,7 +279,7 @@ const ModalCreateRemind: FC<ModalCreateRemindProps> = ({
         <Form
           isUpdateCycleForm={isUpdateCycleForm}
           type={type}
-          remindData={convertTimestampsToMoment(remindData)}
+          remindData={remindData}
           onReload={onReload}
           action={action}
         />

@@ -5,6 +5,7 @@ import ModalAddViahicle from "../../../../conponents/modals/ModalAddViahicle"
 
 import { ViahicleType } from "../../../../interface/interface"
 import { SettingOutlined } from "@ant-design/icons"
+import ModalCreateRemind from "../../../../conponents/modals/ModalCreateRemind"
 
 const getColumnViahicleNoGPS = (
   setViahicleSelect: any,
@@ -49,7 +50,11 @@ const getColumnViahicleNoGPS = (
       render(value, record, index) {
         return {
           children: record?.icons?.map((icon: any, index: number) => (
-            <span key={index}> {icon?.icon}</span>
+            <ModalCreateRemind
+              type="update"
+              remindData={record}
+              button={<span key={index}> {icon?.icon}</span>}
+            />
           )),
         }
       },

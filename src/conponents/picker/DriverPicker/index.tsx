@@ -36,7 +36,7 @@ export const DriverPicker: React.FC<IProps> = ({ props = {}, filter }) => {
   }, [driverList, filter])
   return (
     <Select
-      placeholder="Chọn lái xe"
+      placeholder="Chọn lái phương tiện"
       filterOption={filterOptions?.select}
       options={options}
       {...props}
@@ -94,7 +94,7 @@ export const DriverTreeSelect: React.FC<IVehicleTreeSelect> = memo(
           treeCheckable
           treeDefaultExpandAll
           showCheckedStrategy={"SHOW_CHILD"}
-          placeholder="Chọn lái xe"
+          placeholder="Chọn lái phương tiện"
           {...tProps}
           {...props}
         />

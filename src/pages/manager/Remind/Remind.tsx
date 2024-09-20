@@ -36,25 +36,32 @@ const Remind: FC<RemindProps> = () => {
     viahiclesContext,
   ) as ViahicleProviderContextProps
 
-  const fetchViahicle = async (keyword: string = "") => {
+  const fetchViahicle = async (
+    keyword: string = "",
+    limit: number = 10,
+    offset: number = 0,
+  ) => {
     // alert('co fe')
-    setViahicles([])
     dispatch?.setLoading?.(true)
     if (tab === "1") {
       try {
         const res = await axios.get(
-          `https://sys01.midvietnam.net/api/v1/device/rows?keyword=${keyword}&offset=0&limit=50&type=1`,
+          `https://sys01.midvietnam.net/api/v1/device/rows?keyword=${keyword}&offset=${offset}&limit=${limit}&type=1`,
           {
             headers: {
               Authorization: `Bearer ${storage.getAccessToken()}`,
             },
           },
         )
+
+        const totalPage = res?.data?.totalPage
+        dispatch?.setTotalPageGPS?.(totalPage)
+
         const remind_viahicles_gps = await getIconRemindViahicleGPS()
 
-        const viahicleGPS = res?.data?.data?.map((item: any) => {
+        const viahicleGPS = res?.data?.data?.map((item: any, index: number) => {
           return {
-            key: item.id,
+            key: index,
             id: item.id,
             license: item.imei,
             license_plate: item.vehicle_name,
@@ -73,8 +80,13 @@ const Remind: FC<RemindProps> = () => {
     } else {
       try {
         const res = await getViahicle(keyword)
+        console.log("dataa trc loc >>", res)
+
         const data = getData(res?.data)
+        console.log("dataa loc >>", data)
+
         const remind_viahicles_NoGPS = await getIconRemindViahicleGPS()
+
         data.map((item: any) => {
           item["icons"] = remind_viahicles_NoGPS.data[item.license_plate]
         })
@@ -88,8 +100,20 @@ const Remind: FC<RemindProps> = () => {
   }
   useEffect(() => {
     const keyword = viahiclesStore.keyword
-    fetchViahicle(keyword)
-  }, [tab, viahiclesStore.freshKey, viahiclesStore.keyword])
+    const keywordNoGPS = viahiclesStore.keywordNoGPS
+    if (tab === "1") {
+      fetchViahicle(keyword, viahiclesStore.limit, viahiclesStore.offset)
+    } else {
+      fetchViahicle(keywordNoGPS)
+    }
+  }, [
+    tab,
+    viahiclesStore.freshKey,
+    viahiclesStore.keyword,
+    viahiclesStore.keywordNoGPS,
+    viahiclesStore.offset,
+    viahiclesStore.limit,
+  ])
 
   useEffect(() => {
     dispatch?.setViahicle([])

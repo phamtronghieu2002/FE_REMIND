@@ -12,6 +12,8 @@ import "dayjs/locale/vi"
 import { App } from "./App"
 import i18nConfig from "./i18n"
 import { ThemeConfigHoc } from "./hocs/ThemeConfigHoc"
+import "react-toastify/dist/ReactToastify.css"
+
 import {
   Chart as ChartJS,
   CategoryScale,

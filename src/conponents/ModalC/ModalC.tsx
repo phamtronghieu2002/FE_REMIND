@@ -82,7 +82,7 @@ export const ModalCView = forwardRef<ModalCViewAction, IProps>(
               setOpen(true)
             } else {
               api.message?.error(
-                "Vui lòng chọn xe trước khi tạo thông báo nhắc nhở !!",
+                "Vui lòng chọn phương tiện trước khi tạo thông báo nhắc nhở !!",
               )
             }
           }}

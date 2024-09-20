@@ -14,6 +14,7 @@ import {
 import ModalImportExel from "../../../../conponents/modals/ModalImportExel"
 import ModalAddViahicle from "../../../../conponents/modals/ModalAddViahicle"
 import { MaskLoader } from "../../../../conponents/Loader"
+import { log } from "console"
 interface ViahicleNoGPSType {
   viahicles: ViahicleType[]
 }
@@ -22,6 +23,9 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
     viahiclesContext,
   ) as ViahicleProviderContextProps
 
+  console.log("====================================")
+  console.log("viahiclesStore?.totalPageNoGPS ", viahiclesStore?.totalPageNoGPS)
+  console.log("====================================")
   //handle logig reload
   const onReload = () => {
     dispatch.freshKey()
@@ -43,28 +47,36 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
         title="123"
         onReload={onReload}
         search={{
+          placeholder: "Tìm kiếm biển số,số điện thoại",
           width: 200,
           onSearch(q) {
-            dispatch.setKeyword(q)
+            dispatch.setKeywordNoGPS(q)
           },
-          limitSearchLegth: 3,
+          limitSearchLegth: 0,
         }}
         right={
           <>
             <ModalAddViahicle
               type="add"
-              button={<Button type="primary">Thêm xe</Button>}
+              button={<Button type="primary">Thêm phương tiện</Button>}
             />
             <ModalImportExel
-              button={<Button type="primary">Import Excel</Button>}
+              button={<Button type="primary">Tải lên exel</Button>}
             />
           </>
         }
         props={{
-          columns: getColumnViahicleNoGPS(dispatch?.setViahicle),
+          columns: getColumnViahicleNoGPS(
+            dispatch?.setViahicle,
+            viahiclesStore?.totalPageNoGPS || 0,
+          ),
           dataSource: viahicles,
           size: "middle",
-          pagination: {},
+          pagination: {
+            onChange: (page, pageSize) => {
+              dispatch?.setTotalPageNoGPS(page)
+            },
+          },
         }}
       />
     </div>

@@ -49,6 +49,7 @@ interface ISearchProps {
   onSearch?: (q: string) => void
   limitSearchLegth?: number
   styles?: React.CSSProperties
+  placeholder?: string
 }
 
 interface IScroll {
@@ -100,7 +101,7 @@ const Search: React.FC<ISearch> = ({ search, setQ, styles = {} }) => {
           const value = e?.target?.value
           setInput(value)
         }}
-        placeholder="Tìm kiếm biển số, số điện thoại"
+        placeholder={search?.placeholder || "Tìm kiếm..."}
         style={{
           height: 24,
           width: search?.width,

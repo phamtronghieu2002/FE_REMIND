@@ -6,22 +6,33 @@ interface ViahicleProviderProps {
   viahiclesStore: ViahicleType[]
   freshKey?: number
   keyword?: string
+  keywordNoGPS?: string
+
   type: number
   loading?: boolean
   viahicleGPS?: ViahicleType[]
+  limit?: number
+  offset?: number
+  totalPageGPS?: number
+  totalPageNoGPS?: number
 }
 
 export interface ViahicleProviderContextProps {
   viahiclesStore: ViahicleProviderProps
 
   dispatch: {
+    setTotalPageNoGPS: (totalPageGPS: number) => void
     setTypeViahicle: (type: number) => void
     freshKey: () => void
     setKeyword: (keyword: string) => void
+    setKeywordNoGPS: (keyword: string) => void
     setViahicle: (viahicle: ViahicleType[]) => void
     getIdViahicles: () => number[] // Assuming `id` is a string
     setLoading?: (loading: boolean) => void
     setViahicleGPS?: (viahicleGPS: ViahicleType[]) => void
+    setOffset: (offset: number) => void
+    setLimit: (limit: number) => void
+    setTotalPageGPS?: (totalPageGPS: number) => void
   }
 }
 
@@ -32,6 +43,10 @@ const initState: ViahicleProviderProps = {
   keyword: "",
   type: 1,
   loading: false,
+  limit: 10,
+  offset: 0,
+  totalPageGPS: 0,
+  totalPageNoGPS: 1,
 }
 
 export const viahiclesContext = React.createContext<
@@ -43,6 +58,18 @@ const ViahicleProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     React.useState<ViahicleProviderProps>(initState)
 
   const dispatch = {
+    setTotalPageNoGPS: (totalPageNoGPS: number) => {
+      setState((prevState) => ({
+        ...prevState,
+        totalPageNoGPS: totalPageNoGPS,
+      }))
+    },
+    setTotalPageGPS: (totalPageGPS: number) => {
+      setState((prevState) => ({
+        ...prevState,
+        totalPageGPS: totalPageGPS,
+      }))
+    },
     setTypeViahicle: (type: number) => {
       setState((prevState) => ({
         ...prevState,
@@ -58,7 +85,7 @@ const ViahicleProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     freshKey: () => {
       setState({ ...viahiclesStore, freshKey: Math.random() })
     },
-    
+
     setLoading: (loading: boolean) => {
       setState((prevState) => ({
         ...prevState,
@@ -67,6 +94,9 @@ const ViahicleProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     },
     setKeyword: (keyword: string) => {
       setState({ ...viahiclesStore, keyword: keyword })
+    },
+    setKeywordNoGPS: (keyword: string) => {
+      setState({ ...viahiclesStore, keywordNoGPS: keyword })
     },
     setViahicle: (viahicle: ViahicleType[]) => {
       setState((prevState) => ({
@@ -78,6 +108,18 @@ const ViahicleProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
       return viahiclesStore.viahiclesStore
         .map((viahicle) => viahicle.id)
         .filter((id) => id !== undefined)
+    },
+    setOffset: (offset: number) => {
+      setState((prevState) => ({
+        ...prevState,
+        offset: offset,
+      }))
+    },
+    setLimit: (limit: number) => {
+      setState((prevState) => ({
+        ...prevState,
+        limit: limit,
+      }))
     },
   }
 

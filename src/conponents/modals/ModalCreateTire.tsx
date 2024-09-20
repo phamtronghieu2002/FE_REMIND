@@ -73,7 +73,7 @@ const FormAdd: FC<{
   const getAction = () => {
     if (type == "add") {
       return {
-        title: "Thêm lốp xe",
+        title: "Thêm lốp phương tiện",
         okButton: "Thêm",
         okCallback: () => {
           form
@@ -82,13 +82,13 @@ const FormAdd: FC<{
               // call api thêm lốp
               try {
                 await addTire({
-                  seri: values.seri,
-                  size: values.size,
-                  brand: values.brand,
-                  license_plate: lisence_plate,
+                  seri: values.seri.trim(),
+                  size: values.size.trim(),
+                  brand: values.brand.trim(),
+                  license_plate: lisence_plate.trim(),
                 })
 
-                api.message?.success("Thêm lốp xe thành công")
+                api.message?.success("Thêm lốp phương tiện thành công")
                 onRefresh?.()
                 action?.closeModal()
               } catch (error) {
@@ -103,12 +103,12 @@ const FormAdd: FC<{
     }
     if (type == "delete") {
       return {
-        title: "Xoá lốp xe",
+        title: "Xoá lốp phương tiện",
         okButton: "Xoá",
         okCallback: async () => {
           // call api xoá lốp
           await deleteTire(tireId)
-          api.message?.success("Xoá lốp xe thành công")
+          api.message?.success("Xoá lốp phương tiện thành công")
           onRefresh?.()
           action?.closeModal()
         },
@@ -123,12 +123,17 @@ const FormAdd: FC<{
             .validateFields()
             .then(async (values) => {
               try {
+                // trim các field
+                values.seri = values.seri.trim()
+                values.size = values.size.trim()
+                values.brand = values.brand.trim()
+
                 await updateTire(tireId, values)
                 api.message?.success("Chỉnh sửa lốp thành công")
                 onRefresh?.()
                 action?.closeModal()
               } catch (error) {
-                api.message?.error("Chỉnh sửa lốp thất bại !!")
+                api.message?.error("Trùng series lốp!!")
               }
             })
             .catch((errorInfo) => {
@@ -216,7 +221,7 @@ const ModalCreateTire: FC<ModalCreateTireProps> = ({
   const getAction = () => {
     if (type === "add") {
       return {
-        title: "Thêm lốp cho xe",
+        title: "Thêm lốp cho phương tiện",
       }
     }
     if (type === "delete") {

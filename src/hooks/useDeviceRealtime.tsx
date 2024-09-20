@@ -109,7 +109,7 @@ export const useDeviceRealtime = (device: number) => {
   }
 
   const TOTAL_TIME_RUNNING = {
-    title: "Tổng thời gian xe chạy",
+    title: "Tổng thời gian phương tiện chạy",
     value: getTime?.caculateTime(realtime?.total_run_time),
     icon: <FaShippingFast size={iconSize} />,
   }
@@ -121,7 +121,7 @@ export const useDeviceRealtime = (device: number) => {
   }
 
   const CONTINUS_DRIVE = {
-    title: "Thời gian lái xe liên tục",
+    title: "Thời gian lái phương tiện liên tục",
     value: getTime?.caculateTime(realtime?.running_time),
     icon: <PiCarSimpleDuotone size={iconSize} />,
   }

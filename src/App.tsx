@@ -14,6 +14,7 @@ import { useEffect, useState } from "react"
 import { requestFCMToken, onMessageListener } from "./utils/firebase"
 import { addFirebaseToken } from "./apis/firebaseAPI"
 import storage from "./utils/storage"
+import { ToastContainer, toast } from "react-toastify"
 
 export const fetchFCM = async () => {
   try {
@@ -21,20 +22,28 @@ export const fetchFCM = async () => {
 
     if (data) {
       await addFirebaseToken(data)
-  
     }
   } catch (error) {
     console.log(error)
   }
 }
 export const App: React.FC = () => {
-  onMessageListener().then((payload) => {
-    // toast(<div>
-    //   <p>{payload.notification.title}</p>
-    //   <p>{payload.notification.body}</p>
-    // </div>, {position: 'top-right'});
-  })
+  useEffect(() => {
+    const unsubscribe: any = onMessageListener((payload: any) => {
+      toast(
+        <div>
+          <p>{payload.notification.title}</p>
+          <p>{payload.notification.body}</p>
+        </div>,
+        { position: "top-right" },
+      )
+    })
 
+    // Cleanup khi component bị unmount để tránh duplicate listener
+    return () => {
+      unsubscribe()
+    }
+  }, []) //
   const [notifyAPI, contextHolder] = notification.useNotification()
   const [messageApi, contextMsgHolder] = message.useMessage()
   const [modal, contextModalHolder] = Modal.useModal()
@@ -46,6 +55,7 @@ export const App: React.FC = () => {
   return (
     <>
       <BrowserRouter>
+        <ToastContainer />
         <Routes>
           {routes.map((route, index) => {
             const Layout: any = route.layout

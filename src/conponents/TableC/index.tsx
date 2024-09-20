@@ -55,6 +55,7 @@ interface ISearchProps {
   onSearch?: (q: string) => void
   limitSearchLegth?: number
   styles?: React.CSSProperties
+  placeholder?: string
 }
 
 interface IScroll {
@@ -63,6 +64,7 @@ interface IScroll {
 }
 
 interface IProps {
+  loading?: boolean
   hiddenTitle?: boolean
   props: TableProps<any>
   title?: ReactNode
@@ -105,7 +107,7 @@ const Search: React.FC<ISearch> = ({ search, setQ, styles = {} }) => {
           const value = e?.target?.value
           setInput(value)
         }}
-        placeholder="Tìm kiếm"
+        placeholder={search?.placeholder || "Tìm kiếm..."}
         style={{
           height: 24,
           width: search?.width,
@@ -120,6 +122,7 @@ const Search: React.FC<ISearch> = ({ search, setQ, styles = {} }) => {
 }
 
 export const TableC: React.FC<IProps> = ({
+  loading,
   hiddenTitle,
   title,
   right,
@@ -147,6 +150,9 @@ export const TableC: React.FC<IProps> = ({
     viahiclesContext,
   ) as ViahicleProviderContextProps
 
+  console.log("====================================")
+  console.log("props >>", props)
+  console.log("====================================")
   const rowSelection = {
     selectedRowKeys, // Dùng state để lưu trữ các hàng đang được chọn
     onChange: (newSelectedRowKeys: React.Key[], selectedRows: any) => {
@@ -418,6 +424,7 @@ export const TableC: React.FC<IProps> = ({
         </div>
       ) : null}
       <Table
+        loading={loading}
         rowSelection={
           checkBox
             ? {
@@ -427,7 +434,8 @@ export const TableC: React.FC<IProps> = ({
             : undefined
         }
         pagination={{
-          defaultPageSize: 50,
+          defaultPageSize: 10,
+
           showTotal(total, range) {
             if (!showTotal) return undefined
 
@@ -446,7 +454,6 @@ export const TableC: React.FC<IProps> = ({
         columns={filterColums}
         dataSource={props?.dataSource?.filter?.((d) => {
           if (!q || !search?.key?.length) return true
-
           const qString = q?.toLocaleLowerCase?.() || ""
 
           const r =

@@ -177,8 +177,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         setLoading(true)
         const res = await getCategory()
         setLoading(false)
-  
-   
+
         if ((viahicleSelected?.length ?? 0) > 1) {
           const newRes = res?.data.filter((item: CategoryType) => {
             return item.id != 6
@@ -205,13 +204,13 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         if (Object.keys(initialValues).length === 0) {
           form.setFieldsValue({
             is_notified: true,
-            note_repair: "Tới hạn thay dầu rồi,đi thay dầu thôi !!",
+            note_repair: "Nội dung nhắc nhở !!!",
           })
         } else {
           // cộng thêm n tháng
-          initialValues.expiration_time = dayjs(
-            initialValues?.expiration_timeStamp,
-          ).add(isUpdateCycleForm ? initialValues?.cycle : 0, "months")
+          initialValues.expiration_time = isUpdateCycleForm
+            ? dayjs(Date.now()).add(initialValues?.cycle, "months")
+            : initialValues?.expiration_time
 
           const tire = initialValues?.tire
           if (tire) {
@@ -266,13 +265,13 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           })
       }
     }, [timeSelect.length, randomKey])
-    // xử lí render lốp khi chọn xe
+    // xử lí render lốp khi chọn phương tiện
     useEffect(() => {
       if (vhiahicleTire) {
         fetchTire()
       }
     }, [vhiahicleTire?.license_plate])
-    // xử lí chọn xe
+    // xử lí chọn phương tiện
     const handleSelectViahicle = (value: string) => {
       const viahicle: any = viahicleSelected?.find((item: ViahicleType) =>
         viahiclesStore?.type == 0
@@ -293,7 +292,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
       if (value === 6) {
         if (viahicleSelected?.length == 1) {
           setViahicleTire(viahiclesStore?.viahiclesStore[0])
-          //  xử lí khi  chọn 1 xe
+          //  xử lí khi  chọn 1 phương tiện
           viahicleSelected?.length == 1
             ? viahiclesStore?.type == 1
               ? form.setFieldValue("vehicles", viahicleSelected[0]?.imei)
@@ -314,17 +313,23 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         Modal.error({
           title: "chỉ cho phép tải ảnh !",
         })
-        return Upload.LIST_IGNORE; // Ngăn kh
+        return Upload.LIST_IGNORE // Ngăn kh
       }
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt2M = file.size / 1024 / 1024 < 2
       if (!isLt2M) {
         Modal.error({
-          title: 'Kích thước ảnh phải dưới 2MB!',
-        });
-        return Upload.LIST_IGNORE; // Ngăn không cho tải file lớn hơn 2MB
+          title: "Kích thước ảnh phải dưới 2MB!",
+        })
+        return Upload.LIST_IGNORE // Ngăn không cho tải file lớn hơn 2MB
       }
-    
-    
+      // quá 10 ảnh thì không cho thêm, tắt nút thêm ảnh
+      if (imageFiles.length >= 10) {
+        Modal.error({
+          title: "Chỉ cho phép tải tối đa 10 ảnh!",
+        })
+        return Upload.LIST_IGNORE
+      }
+
       return isImage
     }
 
@@ -372,9 +377,11 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
             <>
               <Form.Item
                 name="vehicles"
-                rules={[{ required: true, message: "Vui lòng chọn xe" }]}
+                rules={[
+                  { required: true, message: "Vui lòng chọn phương tiện" },
+                ]}
                 style={{ gap: 10 }}
-                label="Chọn xe"
+                label="Chọn phương tiện"
               >
                 <Select
                   className="select-viahicle"
@@ -455,29 +462,6 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
-                      name="km_before"
-                      label="Cảnh báo trước"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Vui lòng nhập KM cảnh báo trước",
-                        },
-                      ]}
-                    >
-                      <InputNumber
-                        defaultValue={initialValues?.km_before}
-                        onChange={(value) => {
-                          form.setFieldsValue({ km_before: value })
-                        }}
-                      />
-                      <span style={{ marginLeft: 10, display: "inline-block" }}>
-                        (KM)
-                      </span>
-                    </Form.Item>
-                  </Col>
-
-                  <Col span={12}>
-                    <Form.Item
                       name="cumulative_kilometers"
                       label="KM cảnh báo"
                       rules={[
@@ -491,6 +475,28 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                         defaultValue={initialValues?.cumulative_kilometers}
                         onChange={(value) => {
                           form.setFieldsValue({ cumulative_kilometers: value })
+                        }}
+                      />
+                      <span style={{ marginLeft: 10, display: "inline-block" }}>
+                        (KM)
+                      </span>
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="km_before"
+                      label="Cảnh báo trước"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Vui lòng nhập KM cảnh báo trước",
+                        },
+                      ]}
+                    >
+                      <InputNumber
+                        defaultValue={initialValues?.km_before}
+                        onChange={(value) => {
+                          form.setFieldsValue({ km_before: value })
                         }}
                       />
                       <span style={{ marginLeft: 10, display: "inline-block" }}>
@@ -583,12 +589,17 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                 const updatedImageFiles = imageFiles.filter(
                   (imgFile: any) => imgFile.name !== file.name,
                 )
-           
+
                 setImageFiles(updatedImageFiles)
               }}
             >
               <div>
-                <PlusOutlined />
+                {imageFiles.length < 10 ? (
+                  <>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                  </>
+                ) : null}
                 <div style={{ marginTop: 8 }}>Ảnh</div>
               </div>
             </Upload>

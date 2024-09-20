@@ -30,7 +30,7 @@ const UploadExel: React.FC<UploadExelProps> = ({
 
         const header = jsonData[0] // Hàng đầu tiên là tiêu đề cột
 
-        const indexBienSoXe = header.indexOf("Biển số xe")
+        const indexBienSoXe = header.indexOf("Biển số phương tiện")
         const indexLoaiCanhBao = header.indexOf("Loại cảnh báo")
         const indexPhoneNumber = header.indexOf("Số điện thoại")
         const indexName = header.indexOf("Họ và tên")

@@ -142,9 +142,9 @@ const FormAdd: FC<{
           wrapperCol={{ span: 18 }}
         >
           <Form.Item
-            label="Biển số xe"
+            label="Biển số"
             name="license_plate"
-            rules={[{ required: true, message: "Vui lòng nhập biển số xe!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập biển số phương tiện!" }]}
           >
             <Input />
           </Form.Item>
@@ -206,12 +206,12 @@ const ModalAddViahicleMobile: FC<ModalAddViahicleProps> = ({
     }
     if (type === "delete") {
       return {
-        title: `Xoá xe ${data?.license_plate}`,
+        title: `Xoá phương tiện ${data?.license_plate}`,
       }
     }
     if (type === "update") {
       return {
-        title: `Chỉnh sửa xe ${data?.license_plate}`,
+        title: `Chỉnh sửa phương tiện ${data?.license_plate}`,
       }
     }
     return {}

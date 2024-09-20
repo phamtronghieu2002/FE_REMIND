@@ -34,16 +34,19 @@ const ImportExel: FC<{
 
   const handleImport = async () => {
     try {
+      console.log("====================================")
+      console.log("excelData", excelData)
+      console.log("====================================")
       //check format date
       excelData.forEach((item, index) => {
         //nếu type_ = add thì mọi thứ như cũ em chạy code bth
-        // nếu mà type_= replaced thì sẽ call api update tất cả remind của biển số xe có trong file excel trước
+        // nếu mà type_= replaced thì sẽ call api update tất cả remind của biển số phương tiện có trong file excel trước
         // vì replace là thay thế nên sẽ phải update tất cả remind thành trạng thái xóa rồi sau đó add lại thay thế
         // api: /api/v1/remind/main/delete-multi-remind/ body truyền object dạng thế này
         // {
         //  "vehicles": [];
         // }
-        // giờ em cần tạo 1 payload dạng như trên, tách tất cả các biển số xe rồi truyền vào 1 mảng string rồi chạy, sau thì tất cả đều chạy như bình thường post vân...
+        // giờ em cần tạo 1 payload dạng như trên, tách tất cả các biển số phương tiện rồi truyền vào 1 mảng string rồi chạy, sau thì tất cả đều chạy như bình thường post vân...
 
         // Kiểm tra thuộc tính remindDate
         const remindDate = item.remindDate
@@ -71,9 +74,7 @@ const ImportExel: FC<{
         license: String(item.phoneNumber),
         user_address: String(item.address),
       }))
-  console.log('====================================');
-  console.log("type_", type_);
-  console.log('====================================');
+
       if (type_ === "replace") {
         const vehicles = dataNewVehicles.map((item) => item.license_plate)
         console.log("====================================")
@@ -83,7 +84,7 @@ const ImportExel: FC<{
       }
 
       const viahicleGPS = viahiclesStore?.viahicleGPS
-      // check trùng biển số xe và lấy được biển số xe trùng
+      // check trùng biển số phương tiện và lấy được biển số phương tiện trùng
 
       const licensePlates = dataNewVehicles.map((item) => item.license_plate)
       const licensePlatesGPS = viahicleGPS?.map((item) => item.license_plate)
@@ -95,7 +96,7 @@ const ImportExel: FC<{
 
       if (duplicateLicensePlates.length > 0) {
         api.message?.error(
-          `Biển số xe ${duplicateLicensePlates.join(
+          `Biển số ${duplicateLicensePlates.join(
             ", ",
           )} đã tồn tại trong danh sách phương tiện GPS`,
         )
@@ -215,8 +216,9 @@ const ImportExel: FC<{
     } catch (error) {
       console.log("error >>", error)
       api?.message?.error(
-        "Import thất bại seri lốp bị trùng hoặc biển số xe bị trùng",
+        "Import thất bại seri lốp bị trùng hoặc biển số phương tiện bị trùng trong hệ thống !!",
       )
+      action?.closeModal?.()
     }
   }
 

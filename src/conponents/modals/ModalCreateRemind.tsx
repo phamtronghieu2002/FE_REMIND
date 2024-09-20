@@ -11,7 +11,12 @@ import {
 import { api } from "../../_helper"
 import { MaskLoader } from "../Loader"
 import { ViahicleType } from "../../interface/interface"
-import { addRemind, finishRemind, updateRemind } from "../../apis/remindAPI"
+import {
+  addRemind,
+  addRemindGPS,
+  finishRemind,
+  updateRemind,
+} from "../../apis/remindAPI"
 import { log } from "console"
 import { createCategory } from "../../apis/categoryAPI"
 import moment from "moment"
@@ -66,7 +71,11 @@ const Form: FC<{
 
       // call api thêm nhắc nhở
       setLoading(true)
-      await addRemind(images)
+      if (viahiclesStore?.type == 1) {
+        await addRemindGPS(images)
+      } else {
+        await addRemind(images)
+      }
       action?.closeModal?.()
       api.message?.success("Thêm nhắc nhở thành công")
       onReload?.()

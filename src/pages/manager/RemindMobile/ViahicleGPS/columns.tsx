@@ -15,7 +15,7 @@ const getColumnViahicleGPS = (
       render: (text, record, index) => index + 1,
     },
     {
-      title: "Biển số xe",
+      title: "Biển số phương tiện",
       dataIndex: "license_plate",
       key: "licenseNumber",
       sorter: (a, b) => a.license_plate.localeCompare(b.license_plate),
@@ -33,7 +33,7 @@ const getColumnViahicleGPS = (
       render(value, record, index) {
         return {
           children: record?.reminds?.map((icon: any, index: number) => (
-            <span key={index}> {icon}</span>
+            <span key={index}> {icon?.icon}</span>
           )),
         }
       },
@@ -46,7 +46,7 @@ const getColumnViahicleGPS = (
         return (
           <DrawViahicle
             data={record}
-            title="Cài đặt nhắc nhở xe"
+            title="Cài đặt nhắc nhở phương tiện"
             button={
               <Button
                 icon={<SettingOutlined />}

@@ -38,11 +38,16 @@ import "filepond/dist/filepond.min.css"
 import FilePondPluginImagePreview from "filepond-plugin-image-preview"
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
 import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type"
-registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType)
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size"
+registerPlugin(
+  FilePondPluginImagePreview,
+  FilePondPluginFileValidateType,
+  FilePondPluginFileValidateSize,
+)
 import { _log } from "../../../../../utils/_log"
 import dayjs from "dayjs"
 const SERVER_DOMAIN_REMIND = import.meta.env.VITE_HOST_REMIND_SERVER_DOMAIN_IMG
-
+import "./filePond.css"
 // Đăng ký plugin
 
 interface FormAddRemindProps {
@@ -83,6 +88,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
 
     const [form] = Form.useForm()
     const initImageURL = initialValues?.remind_img_url || initialValues?.img_url
+
     const convertUrlsToFiles = async (urls: string[]) => {
       return Promise.all(
         urls.map(async (url) => {
@@ -178,8 +184,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         const res = await getCategory()
         setLoading(false)
 
-    if ((viahicleSelected?.length ?? 0) > 1) {
-         
+        if ((viahicleSelected?.length ?? 0) > 1) {
           const newRes = res?.data.filter((item: CategoryType) => {
             return item.id != 6
           })
@@ -205,13 +210,13 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         if (Object.keys(initialValues).length === 0) {
           form.setFieldsValue({
             is_notified: true,
-            note_repair: "Tới hạn thay dầu rồi,đi thay dầu thôi !!",
+            note_repair: "Nội dung nhắc nhở !!!",
           })
         } else {
           // cộng thêm n tháng
-          initialValues.expiration_time = dayjs(
-            initialValues?.expiration_timeStamp,
-          ).add(isUpdateCycleForm ? initialValues?.cycle : 0, "months")
+          initialValues.expiration_time = isUpdateCycleForm
+            ? dayjs(Date.now()).add(initialValues?.cycle, "months")
+            : initialValues?.expiration_time
 
           const tire = initialValues?.tire
           if (tire) {
@@ -233,6 +238,16 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
         }
       }
     }, [categories?.length])
+
+    useEffect(() => {
+      console.log("====================================")
+      console.log(imageFiles.length, imageFilesUrl.length)
+      console.log("====================================")
+
+      if (imageFiles.length > 10 || imageFilesUrl.length > 10) {
+        api?.message?.error("Tải lên không quá 10 ảnh")
+      }
+    }, [imageFiles.length, imageFilesUrl.length])
 
     useEffect(() => {
       if (timeSelect.length > 0) {
@@ -266,13 +281,13 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           })
       }
     }, [timeSelect.length, randomKey])
-    // xử lí render lốp khi chọn xe
+    // xử lí render lốp khi chọn phương tiện
     useEffect(() => {
       if (vhiahicleTire) {
         fetchTire()
       }
     }, [vhiahicleTire?.license_plate])
-    // xử lí chọn xe
+    // xử lí chọn phương tiện
     const handleSelectViahicle = (value: string) => {
       const viahicle: any = viahicleSelected?.find((item: ViahicleType) =>
         viahiclesStore?.type == 0
@@ -291,7 +306,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
       if (value === 6) {
         if (viahicleSelected?.length == 1) {
           setViahicleTire(viahiclesStore?.viahiclesStore[0])
-          //  xử lí khi  chọn 1 xe
+          //  xử lí khi  chọn 1 phương tiện
           viahicleSelected?.length == 1
             ? viahiclesStore?.type == 1
               ? form.setFieldValue("vehicles", viahicleSelected[0]?.imei)
@@ -324,6 +339,10 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
       buttonDateRef.current?.click()
       setRandomKey(Math.random())
     }
+
+    console.log("====================================")
+    console.log("imageFilesUrl", imageFilesUrl)
+    console.log("====================================")
 
     return (
       <div>
@@ -363,9 +382,11 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
             <>
               <Form.Item
                 name="vehicles"
-                rules={[{ required: true, message: "Vui lòng chọn xe" }]}
+                rules={[
+                  { required: true, message: "Vui lòng chọn phương tiện" },
+                ]}
                 style={{ gap: 10 }}
-                label="Chọn xe"
+                label="Chọn phương tiện"
               >
                 <Select
                   className="select-viahicle"
@@ -443,6 +464,29 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           {viahiclesStore.type ? (
             <>
               <Form.Item
+                name="cumulative_kilometers"
+                label="KM cảnh báo"
+                rules={[
+                  { required: true, message: "Vui lòng nhập KM cảnh báo" },
+                  {
+                    validator: (_, value) =>
+                      value > 0
+                        ? Promise.resolve()
+                        : Promise.reject("KM phải lớn hơn 0"),
+                  },
+                ]}
+              >
+                <InputNumber
+                  onChange={(value) => {
+                    form.setFieldsValue({ cumulative_kilometers: value })
+                  }}
+                  defaultValue={initialValues?.cumulative_kilometers}
+                />
+                <span style={{ marginLeft: 10, display: "inline-block" }}>
+                  (KM)
+                </span>
+              </Form.Item>
+              <Form.Item
                 name="km_before"
                 label="Cảnh báo trước"
                 rules={[
@@ -463,30 +507,6 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                     form.setFieldsValue({ km_before: value })
                   }}
                   defaultValue={initialValues?.km_before}
-                />
-                <span style={{ marginLeft: 10, display: "inline-block" }}>
-                  (KM)
-                </span>
-              </Form.Item>
-
-              <Form.Item
-                name="cumulative_kilometers"
-                label="KM cảnh báo"
-                rules={[
-                  { required: true, message: "Vui lòng nhập KM cảnh báo" },
-                  {
-                    validator: (_, value) =>
-                      value > 0
-                        ? Promise.resolve()
-                        : Promise.reject("KM phải lớn hơn 0"),
-                  },
-                ]}
-              >
-                <InputNumber
-                  onChange={(value) => {
-                    form.setFieldsValue({ cumulative_kilometers: value })
-                  }}
-                  defaultValue={initialValues?.cumulative_kilometers}
                 />
                 <span style={{ marginLeft: 10, display: "inline-block" }}>
                   (KM)
@@ -565,16 +585,25 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           </Form.Item>
 
           {/* Upload ảnh */}
-          <Form.Item label="Tải lên hình ảnh" style={{ gap: 10 }}>
+          <div style={{ gap: 10 }} className="pt-0 pb-0 pl-16">
             <FilePond
+              // giới hạn số lượng file và báo lỗi khi quá giới hạn
+              maxFiles={10}
+              maxFileSize="2MB"
+              labelMaxFileSizeExceeded="ảnh quá 2mb"
+              allowDrop={false}
               imagePreviewHeight={200} // Chiều cao của ảnh preview
               imagePreviewMaxHeight={200} // Chiều cao tối đa của ảnh preview
-              files={imageFilesUrl}
+              files={imageFilesUrl?.length > 0 ? imageFilesUrl : imageFiles}
               allowMultiple={true}
-              maxFiles={5}
               acceptedFileTypes={["image/*"]} // Chỉ chấp nhận file ảnh
               name="images"
-              labelIdle='Kéo thả hình hoặc<span class="filepond--label-action"> Chọn </span>'
+              labelIdle='<span class="filepond--label-action"> Chọn ảnh tải lên</span>'
+              fileValidateTypeDetectType={(source, type) =>
+                new Promise((resolve, reject) => {
+                  resolve(type)
+                })
+              }
               onupdatefiles={(fileItems) => {
                 const validFiles = fileItems
                   .filter((fileItem: any) => {
@@ -593,11 +622,20 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                 // Cập nhật lại danh sách file chỉ với những file hợp lệ
                 setImageFiles(validFiles)
               }}
+              onprocessfiles={() => {}}
               onaddfile={(error, fileItem) => {
                 if (error) {
+                  api?.message?.error(
+                    "Mỗi ảnh không quá 2MB và tải lên không quá 10 ảnh",
+                  )
+
                   setImageFiles((prev) =>
                     prev.filter((item) => item.name !== fileItem.file.name),
                   )
+                  setImageFilesUrl((prev) =>
+                    prev.filter((item) => item.name !== fileItem.file.name),
+                  )
+
                   return
                 }
                 if (!fileItem.file.type.startsWith("image/")) {
@@ -614,7 +652,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
                 }
               }}
             />
-          </Form.Item>
+          </div>
 
           <Form.Item
             className="hidden"

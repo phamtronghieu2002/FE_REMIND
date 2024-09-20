@@ -139,7 +139,7 @@ const MultiRangeDateWithTimePicker = forwardRef<
               value={item.time}
               placeholder="Chọn giờ"
               style={errors[index]?.timeError ? { borderColor: "red" } : {}}
-              format="HH:mm:ss"
+              format="HH:mm"
             />
             {errors[index]?.timeError && (
               <div style={{ color: "red" }}>Vui lòng chọn giờ</div>

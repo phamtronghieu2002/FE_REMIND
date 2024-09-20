@@ -15,11 +15,10 @@ export function getData(data) {
   data.forEach(item => {
     const { vehicle_id
       , user_id, is_deleted, license, license_plate, category_icon, user_name, user_address } = item;
-
     // Nếu id chưa tồn tại trong object tạm, khởi tạo đối tượng
-    if (!groupedData[vehicle_id]) {
-      const key = vehicle_id + 1;
-      groupedData[vehicle_id] = {
+    if (!groupedData[license_plate]) {
+      const key = vehicle_id;
+      groupedData[license_plate] = {
         user_name,
         user_address,
         id: vehicle_id,
@@ -33,10 +32,19 @@ export function getData(data) {
       };
     }
 
+    // sắp xếp theo id
+
     // Thêm name vào mảng name tương ứng với id
-    groupedData[vehicle_id].icons.push(category_icon);
+    groupedData[license_plate].icons.push(category_icon);
   });
+  // 
+
 
   // Chuyển object tạm thành mảng kết quả
-  return Object.values(groupedData);
+  let result = Object.values(groupedData);
+
+  // Sắp xếp mảng theo id (vehicle_id)
+  result.sort((a, b) => -a.id + b.id);
+  // Chuyển object tạm thành mảng kết quả
+  return result
 }

@@ -75,9 +75,9 @@ export const _const = {
     searchReportTitle: {
       rangeTime: "Khoảng thời gian",
       vehicles: "Phương tiện",
-      driver: "Lái xe",
+      driver: "Lái phương tiện",
       minuteParking: "Dừng đỗ lớn hơn (> phút)",
-      driverContinusMinute: "Lái xe liên tục lớn hơn (> tiếng)",
+      driverContinusMinute: "Lái phương tiện liên tục lớn hơn (> tiếng)",
       team: "Tài khoản / Đội PT",
     },
 

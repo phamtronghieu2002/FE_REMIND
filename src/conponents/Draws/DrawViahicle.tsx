@@ -38,6 +38,7 @@ import {
 import { MaskLoader } from "../Loader"
 import getTime from "../../utils/getTime"
 import moment from "moment"
+import { log } from "console"
 
 export interface RemindProps {
   id?: number
@@ -105,7 +106,7 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
 
   const handleCancel = async (e: any, remind: any) => {
     try {
-      await AutoFinishRemind(remind?.remind_id)
+      await AutoFinishRemind(remind?.remind_id, remind?.tire_seri)
       api.message?.success("Gia hạn thông báo thành công")
       fetchRemind()
     } catch (error) {}
@@ -221,15 +222,20 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
       title: "Bật/tắt",
       dataIndex: "isOn",
       key: "isOn",
-      render: (text, record, index) => (
-        <Switch
-          loading={record?.remind_id === loadingButton}
-          defaultChecked={record?.is_notified === 0}
-          onChange={(e) => {
-            handleOnOf(e, record)
-          }}
-        />
-      ),
+      render: (text, record, index) => {
+        console.log("====================================")
+        console.log("record >>>", record)
+        console.log("====================================")
+        return (
+          <Switch
+            loading={record?.remind_id === loadingButton}
+            checked={record?.is_notified === 0 ? true : false}
+            onChange={(e) => {
+              handleOnOf(e, record)
+            }}
+          />
+        )
+      },
     },
 
     {
@@ -283,6 +289,7 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
           fetchRemind()
         }}
         search={{
+          placeholder: "Tìm kiếm nội dung,dịch vụ,...",
           width: 200,
           onSearch(q) {
             onSearch(q)
@@ -383,6 +390,7 @@ export const TabTableTire: FC<{
         hiddenTitle
         title="123"
         search={{
+          placeholder: "Tìm kiếm seri,nhãn hiệu,kích thước,...",
           width: 200,
           onSearch(q) {
             setKeyword(q)
@@ -435,12 +443,12 @@ const DetailViahicleComponents: FC<DetailViahicleComponentsProps> = ({
   const items = (reload: () => void): TabsProps["items"] => [
     {
       key: "2",
-      label: "Nhắc nhở của xe",
+      label: "Nhắc nhở của phương tiện",
       children: <TabTableRemind isReload={isReload} data={viahicleInfor} />,
     },
     {
       key: "3",
-      label: "Lốp của xe",
+      label: "Lốp của phương tiện",
       children: <TabTableTire isAddTireButton data={viahicleInfor} />,
     },
   ]
@@ -466,7 +474,7 @@ const DrawViahicle: FC<DrawViahicleProps> = ({ button, title, data }) => {
     <DrawC
       title={
         <p>
-          Cài đặt nhắc nhở xe : <b>{data?.license_plate}</b>
+          Cài đặt nhắc nhở phương tiện : <b>{data?.license_plate}</b>
         </p>
       }
       button={button}

@@ -163,7 +163,7 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
               type="add"
               button={
                 <Button className="mr-2" type="primary">
-                  Thêm xe
+                  Thêm phương tiện
                 </Button>
               }
             />
@@ -195,9 +195,10 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
         title="123"
         onReload={onReload}
         search={{
+          placeholder: "Tìm kiếm biển số,sdt...",
           width: 277,
           onSearch(q) {
-            dispatch.setKeyword(q)
+            dispatch.setKeywordNoGPS(q)
           },
           limitSearchLegth: 3,
         }}
@@ -208,7 +209,7 @@ const ViahicleNoGPS: FC<ViahicleNoGPSType> = ({ viahicles }) => {
           pagination: {},
         }}
       >
-        {viahicles.map((item: any,index:number) => {
+        {viahicles.map((item: any, index: number) => {
           return (
             <div
               onClick={() => {

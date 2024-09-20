@@ -8,16 +8,17 @@ import { SettingOutlined } from "@ant-design/icons"
 
 const getColumnViahicleNoGPS = (
   setViahicleSelect: any,
+  totalPageNoGPS: number,
 ): TableColumnsType<ViahicleType> => {
   return [
     {
       title: "STT",
       dataIndex: "key",
       key: "key",
-      render: (text, record, index) => index + 1,
+      render: (text, record, index) => (totalPageNoGPS - 1) * 10 + index + 1,
     },
     {
-      title: "Biển số xe",
+      title: "Biển số phương tiện",
       dataIndex: "license_plate",
       key: "licenseNumber",
       sorter: (a, b) => a.license_plate.localeCompare(b.license_plate),
@@ -47,7 +48,9 @@ const getColumnViahicleNoGPS = (
       key: "statusRemind",
       render(value, record, index) {
         return {
-          children: record?.icons?.map((icon: any) => <span> {icon}</span>),
+          children: record?.icons?.map((icon: any, index: number) => (
+            <span key={index}> {icon?.icon}</span>
+          )),
         }
       },
     },
@@ -59,7 +62,7 @@ const getColumnViahicleNoGPS = (
         return (
           <DrawViahicle
             data={record}
-            title="Cài đặt nhắc nhở xe"
+            title="Cài đặt nhắc nhở phương tiện"
             button={
               <Button
                 icon={<SettingOutlined />}

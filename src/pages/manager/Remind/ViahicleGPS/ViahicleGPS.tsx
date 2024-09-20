@@ -21,7 +21,6 @@ const ViahicleGPS: FC<ViahicleGPSType> = ({ viahicles }) => {
     viahiclesContext,
   ) as ViahicleProviderContextProps
 
-
   //handle logig reload
   const onReload = () => {
     dispatch.freshKey()
@@ -34,26 +33,40 @@ const ViahicleGPS: FC<ViahicleGPSType> = ({ viahicles }) => {
 
   return (
     <div className="mt-5">
-      {viahiclesStore.loading && <MaskLoader />}
       <TableC
+        loading={viahiclesStore.loading}
         setViahicleChecked={setViahicleChecked}
         checkBox
         title="123"
         hiddenTitle={true}
         onReload={onReload}
         search={{
+          placeholder: "Tìm kiếm biển số,số điện thoại",
           width: 200,
           onSearch(q) {
             dispatch?.setKeyword(q)
           },
-          limitSearchLegth: 3,
+          limitSearchLegth: 0,
         }}
         right={<></>}
         props={{
-          columns: getColumnViahicleGPS(dispatch?.setViahicle),
+          columns: getColumnViahicleGPS(dispatch?.setViahicle, {
+            limit: viahiclesStore?.limit,
+            offset: viahiclesStore?.offset,
+          }),
           dataSource: viahicles,
           size: "middle",
-          pagination: {},
+          pagination: {
+            pageSize: viahiclesStore?.limit,
+            total:
+              (viahiclesStore?.totalPageGPS ?? 0) *
+              (viahiclesStore?.limit ?? 50),
+            current: (viahiclesStore?.offset ?? 0) + 1,
+            onChange(page, pageSize) {
+              dispatch?.setOffset(page - 1)
+              dispatch?.setLimit(pageSize)
+            },
+          },
         }}
       />
     </div>

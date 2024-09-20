@@ -72,6 +72,12 @@ const FormAdd: FC<{
                   setLoading(false)
                   return
                 }
+                // trim values
+                values.license_plate = values.license_plate.trim()
+                values.user_name = values.user_name.trim()
+                values.user_address = values.user_address.trim()
+                values.license = values.license.trim()
+
                 await addViahicle({
                   ...values,
                 })
@@ -116,6 +122,10 @@ const FormAdd: FC<{
             .then(async (values) => {
               //call api chỉnh sửa phương tiện
               setLoading(true)
+              values.license_plate = values.license_plate.trim()
+              values.user_name = values.user_name.trim()
+              values.user_address = values.user_address.trim()
+              values.license = values.license.trim()
               await updateViahicle(id, values)
               api.message?.success("cập nhật phương tiện thành công")
               dispatch.freshKey()
@@ -148,9 +158,11 @@ const FormAdd: FC<{
           wrapperCol={{ span: 18 }}
         >
           <Form.Item
-            label="Biển số xe"
+            label="Biển số"
             name="license_plate"
-            rules={[{ required: true, message: "Vui lòng nhập biển số xe!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập biển số phương tiện!" },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -209,12 +221,12 @@ const ModalAddViahicle: FC<ModalAddViahicleProps> = ({
     }
     if (type === "delete") {
       return {
-        title: `Xoá xe ${data?.license_plate}`,
+        title: `Xoá phương tiện ${data?.license_plate}`,
       }
     }
     if (type === "update") {
       return {
-        title: `Chỉnh sửa xe ${data?.license_plate}`,
+        title: `Chỉnh sửa phương tiện ${data?.license_plate}`,
       }
     }
     return {}

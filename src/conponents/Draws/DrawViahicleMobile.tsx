@@ -154,11 +154,9 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
     try {
       if (type == 0) {
         let res: any = []
-        if(keyword){
+        if (keyword) {
           res = await getRemindSearch(keyword, data?.license_plate)
-
-        }else{
-
+        } else {
           res = await getRemindSearch(keyword, data?.license_plate)
         }
         const reminds = res?.data.filter(
@@ -297,7 +295,7 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
       render: (text, record, index) => (
         <Switch
           loading={record?.remind_id === loadingButton}
-          defaultChecked={record?.is_notified === 0}
+          checked={record?.is_notified === 0}
           onChange={(e) => {
             handleOnOf(e, record)
           }}
@@ -360,6 +358,7 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
         }}
         hiddenColumnPicker
         search={{
+          placeholder: "Tìm kiếm tên, dịch vụ,...",
           width: 200,
           onSearch(q) {
             onSearch(q)
@@ -455,7 +454,7 @@ const TabTableRemind = memo(({ data, isReload }: any) => {
                       </div>
                       <Switch
                         loading={item?.remind_id === loadingButton}
-                        defaultChecked={item?.is_notified === 0}
+                        checked={item?.is_notified === 0}
                         onChange={(e) => {
                           handleOnOf(e, item)
                         }}
@@ -553,6 +552,7 @@ export const TabTableTire: FC<{
         title="123"
         hiddenColumnPicker
         search={{
+          placeholder: "Tìm kiếm seri, nhãn hiệu, kích thước",
           width: 200,
           onSearch(q) {
             setKeyword(q)
@@ -657,12 +657,12 @@ const DetailViahicleComponents: FC<DetailViahicleComponentsProps> = ({
   const items = (reload: () => void): TabsProps["items"] => [
     {
       key: "2",
-      label: "Nhắc nhở của xe",
+      label: "Nhắc nhở của phương tiện",
       children: <TabTableRemind isReload={isReload} data={viahicleInfor} />,
     },
     {
       key: "3",
-      label: "Lốp của xe",
+      label: "Lốp của phương tiện",
       children: <TabTableTire isAddTireButton data={viahicleInfor} />,
     },
   ]
@@ -691,13 +691,18 @@ const DetailViahicleComponents: FC<DetailViahicleComponentsProps> = ({
   )
 }
 
-const DrawViahicle: FC<DrawViahicleProps> = ({ button, title, data ,setSelectedItems}) => {
+const DrawViahicle: FC<DrawViahicleProps> = ({
+  button,
+  title,
+  data,
+  setSelectedItems,
+}) => {
   return (
     <DrawCM
-    setSelectedItems={setSelectedItems}
+      setSelectedItems={setSelectedItems}
       title={
         <p>
-          Cài đặt nhắc nhở xe : <b>{data?.license_plate}</b>
+          Cài đặt nhắc nhở phương tiện : <b>{data?.license_plate}</b>
         </p>
       }
       button={button}

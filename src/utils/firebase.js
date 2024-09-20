@@ -53,10 +53,9 @@ export const requestFCMToken = async () => {
     .catch((err) => console.log(err));
 };
 
-export const onMessageListener = () => {
-  return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      resolve(payload);
-    });
+export const onMessageListener = (callback) => {
+  onMessage(messaging, (payload) => {
+    console.log("Received message payload:", payload);
+    callback(payload); // Gọi callback mỗi khi nhận được thông báo
   });
 };

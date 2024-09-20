@@ -50,7 +50,6 @@ const Remind: FC<RemindProps> = () => {
             },
           },
         )
-
         const remind_viahicles_gps = await getIconRemindViahicleGPS()
 
         const viahicleGPS = res?.data?.data?.map((item: any) => {
@@ -65,18 +64,7 @@ const Remind: FC<RemindProps> = () => {
           }
         })
 
-        // for (let i = 0; i < viahicleGPS?.length; i++) {
-        //   try {
-        //     const reminds: any = await getRemindVehicleGPS(viahicleGPS[i].imei)
-        //     const icons: any = []
-        //     reminds?.data?.forEach((item: any) => {
-        //       item?.icon && icons.push(item.icon)
-        //     })
-        //     viahicleGPS[i]["icons"] = icons
-        //   } catch (error) {
-        //     api.message?.error("Lỗi !!")
-        //   }
-        // }
+  
 
         dispatch?.setLoading?.(false)
         setViahicles(viahicleGPS)
@@ -101,8 +89,18 @@ const Remind: FC<RemindProps> = () => {
   }
   useEffect(() => {
     const keyword = viahiclesStore.keyword
-    fetchViahicle(keyword)
-  }, [tab, viahiclesStore.freshKey, viahiclesStore.keyword])
+    const keywordNoGPS = viahiclesStore.keywordNoGPS
+    if (tab === "1") {
+      fetchViahicle(keyword)
+    } else {
+      fetchViahicle(keywordNoGPS)
+    }
+  }, [
+    tab,
+    viahiclesStore.freshKey,
+    viahiclesStore.keyword,
+    viahiclesStore.keywordNoGPS,
+  ])
 
   useEffect(() => {
     dispatch?.setViahicle([])

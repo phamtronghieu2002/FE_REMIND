@@ -20,6 +20,15 @@ export const addRemind = (data: any) => {
   })
 }
 
+export const addRemindGPS = (data: any) => {
+  return axios.post(`${SERVER_DOMAIN_REMIND}main/add-remind-gps`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "x-mobicam-token": storage.getAccessToken(),
+    },
+  })
+}
+
 export const updateRemind = (id: number, data: any) => {
   return axios.put(`${SERVER_DOMAIN_REMIND}main/update/${id}`, data, {
     headers: {
@@ -42,9 +51,15 @@ export const getTimeRemind = (id: number) => {
   return axiosInstance.get("/main/get-schedule/" + id)
 }
 
-export const AutoFinishRemind = (id: number) => {
-  return axiosInstance.post("/main/finish-remind/" + id, {
-    token: storage?.getAccessToken(),
+export const AutoFinishRemind = (id: number, tire_seri: any) => {
+  const data = new FormData()
+  data?.append("tire_seri", tire_seri)
+  data?.append("token", storage.getAccessToken())
+  return axios.post(`${SERVER_DOMAIN_REMIND}main/finish-remind/` + id, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "x-mobicam-token": storage.getAccessToken(),
+    },
   })
 }
 export const getRemindByLisencePlate = (lisense_plate: string) => {
@@ -70,14 +85,9 @@ export const TurnOffRemind = (id: number) => {
 }
 // api: /api/v1/remind/main/delete-multi-remind/ body truyền object dạng thế này
 
-
-
-export const deleMultiRemind  = (vehicles: string[]) => {
-  return axiosInstance.post("/main/delete-multi-remind/", {vehicles})
+export const deleMultiRemind = (vehicles: string[]) => {
+  return axiosInstance.post("/main/delete-multi-remind/", { vehicles })
 }
-
-
-
 
 export const getRemindVehicleGPS = (
   lisense_plate: string,

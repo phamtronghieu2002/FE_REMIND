@@ -15,6 +15,7 @@ import { MaskLoader } from "../Loader"
 import { addTire } from "../../apis/tireAPI"
 import { createCategory, getCategory } from "../../apis/categoryAPI"
 import { addRemind, deleMultiRemind } from "../../apis/remindAPI"
+import { log } from "console"
 interface ModalImportExelProps {
   button: React.ReactNode
 }
@@ -76,14 +77,14 @@ const ImportExel: FC<{
       })
 
       //data của add phương tiện mới
-      const dataNewVehiclesAdd = objectConvert["add"].map((item: any) => ({
+      const dataNewVehiclesAdd = objectConvert["add"]?.map((item: any) => ({
         license_plate: String(item.license_plate),
         user_name: String(item.name),
         license: String(item.phoneNumber),
         user_address: String(item.address),
       }))
 
-      const dataNewVehiclesRep = objectConvert["replace"].map((item: any) => ({
+      const dataNewVehiclesRep = objectConvert["replace"]?.map((item: any) => ({
         license_plate: String(item.license_plate),
         user_name: String(item.name),
         license: String(item.phoneNumber),
@@ -98,38 +99,44 @@ const ImportExel: FC<{
       // }))
 
       if (dataNewVehiclesRep?.length > 0) {
-        const vehicles = dataNewVehiclesRep.map(
-          (item: any) => item.license_plate,
-        )
-        console.log("====================================")
-        console.log("vehicles", vehicles)
-        console.log("====================================")
-        const res = await deleMultiRemind(vehicles)
+            try {
+              const vehicles = dataNewVehiclesRep.map(
+                (item: any) => item.license_plate,
+              )
+              console.log("====================================")
+              console.log("vehicles", vehicles)
+              console.log("====================================")
+              const res = await deleMultiRemind(vehicles)
+            } catch (error) {
+                console.log('====================================');
+                console.log("error delete remind", error);
+                console.log('====================================');
+            }
       }
 
       const viahicleGPS = viahiclesStore?.viahicleGPS
       // check trùng biển số phương tiện và lấy được biển số phương tiện trùng
 
-      const licensePlatesAdd = dataNewVehiclesAdd.map(
+      const licensePlatesAdd = dataNewVehiclesAdd?.map(
         (item: any) => item.license_plate,
       )
-      const licensePlatesRep = dataNewVehiclesRep.map(
+      const licensePlatesRep = dataNewVehiclesRep?.map(
         (item: any) => item.license_plate,
       )
 
       const licensePlatesGPS = viahicleGPS?.map((item) => item.license_plate)
 
-      const duplicateLicensePlates1 = licensePlatesAdd.filter((item: any) =>
+      const duplicateLicensePlates1 = licensePlatesAdd?.filter((item: any) =>
         licensePlatesGPS?.includes(item),
       )
-      const duplicateLicensePlates2 = licensePlatesRep.filter((item: any) =>
+      const duplicateLicensePlates2 = licensePlatesRep?.filter((item: any) =>
         licensePlatesGPS?.includes(item),
       )
       // console.log("duplicateLicensePlates;", duplicateLicensePlates)
 
       if (
-        duplicateLicensePlates1.length > 0 ||
-        duplicateLicensePlates2.length > 0
+        duplicateLicensePlates1?.length > 0 ||
+        duplicateLicensePlates2?.length > 0
       ) {
         api.message?.error(
           `Biển số ${(duplicateLicensePlates1 || duplicateLicensePlates2).join(
@@ -140,9 +147,12 @@ const ImportExel: FC<{
       }
 
       setLoading(true)
-
-      await addViahicleExel(dataNewVehiclesAdd)
-      await addViahicleExel(dataNewVehiclesRep)
+      if (dataNewVehiclesAdd?.length > 0) {
+        await addViahicleExel(dataNewVehiclesAdd)
+      }
+      if (dataNewVehiclesRep?.length > 0) {
+        await addViahicleExel(dataNewVehiclesRep)
+      }
 
       const parsedRemindTireData = excelData.flatMap((item) =>
         item.remindTire
@@ -161,7 +171,7 @@ const ImportExel: FC<{
         try {
           await addTire(parsedRemindTireData[i])
         } catch (error) {
-          api.message?.error("Thêm lốp bị trùng series")
+          api.message?.success("Thêm lốp bị trùng series")
         }
       }
       const convertToUnix = (dateString: string): any => {
@@ -226,7 +236,9 @@ const ImportExel: FC<{
           vehicles: [item.license_plate?.toString()],
         }
       })
-
+      console.log("====================================")
+      console.log("formattedData >>>>>>>>>>>>>>>>>", formattedData)
+      console.log("====================================")
       for (let i = 0; i < formattedData.length; i++) {
         let cate_id = ""
         let typeFind = type.find(

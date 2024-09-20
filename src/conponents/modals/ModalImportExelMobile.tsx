@@ -4,7 +4,7 @@ import { Button } from "antd"
 import UploadExel from "../../pages/manager/Remind/components/Upload/UploadFile"
 import { FileExcelOutlined } from "@ant-design/icons"
 import {
-  ViahicleProviderContextProps, 
+  ViahicleProviderContextProps,
   viahiclesContext,
 } from "../../pages/manager/RemindMobile/providers/ViahicleProvider"
 
@@ -15,6 +15,7 @@ import { MaskLoader } from "../Loader"
 import { addTire } from "../../apis/tireAPI"
 import { createCategory, getCategory } from "../../apis/categoryAPI"
 import { addRemind, deleMultiRemind } from "../../apis/remindAPI"
+import { log } from "console"
 interface ModalImportExelProps {
   button: React.ReactNode
 }
@@ -26,7 +27,6 @@ const ImportExel: FC<{
   const [excelData, setExcelData] = useState<any[]>([])
   const [excelDefaultTime, setExcelDefaultTime] = useState<any>()
   const [loading, setLoading] = useState(false)
-  const [type_, setType] = useState<any>()
 
   const { viahiclesStore, dispatch } = useContext(
     viahiclesContext,
@@ -34,6 +34,18 @@ const ImportExel: FC<{
 
   const handleImport = async () => {
     try {
+      console.log("====================================")
+      console.log("excelData", excelData)
+      const objectConvert: any = {}
+
+      excelData.forEach((item: any) => {
+        const { typeExcel, ...orther } = item
+        if (!objectConvert[item.typeExcel]) objectConvert[item.typeExcel] = []
+        objectConvert[item.typeExcel].push(orther)
+      })
+      console.log("converted excel data: ", objectConvert)
+
+      console.log("====================================")
       //check format date
       excelData.forEach((item, index) => {
         //nếu type_ = add thì mọi thứ như cũ em chạy code bth
@@ -65,37 +77,69 @@ const ImportExel: FC<{
       })
 
       //data của add phương tiện mới
-      const dataNewVehicles = excelData.map((item) => ({
+      const dataNewVehiclesAdd = objectConvert["add"]?.map((item: any) => ({
         license_plate: String(item.license_plate),
         user_name: String(item.name),
         license: String(item.phoneNumber),
         user_address: String(item.address),
       }))
-      console.log("====================================")
-      console.log("type_", type_)
-      console.log("====================================")
-      if (type_ === "replace") {
-        const vehicles = dataNewVehicles.map((item) => item.license_plate)
-        console.log("====================================")
-        console.log("vehicles", vehicles)
-        console.log("====================================")
-        const res = await deleMultiRemind(vehicles)
+
+      const dataNewVehiclesRep = objectConvert["replace"]?.map((item: any) => ({
+        license_plate: String(item.license_plate),
+        user_name: String(item.name),
+        license: String(item.phoneNumber),
+        user_address: String(item.address),
+      }))
+
+      // const dataNewVehicles= excelData.map((item:any) => ({
+      //   license_plate: String(item.license_plate),
+      //   user_name: String(item.name),
+      //   license: String(item.phoneNumber),
+      //   user_address: String(item.address),
+      // }))
+
+      if (dataNewVehiclesRep?.length > 0) {
+            try {
+              const vehicles = dataNewVehiclesRep.map(
+                (item: any) => item.license_plate,
+              )
+              console.log("====================================")
+              console.log("vehicles", vehicles)
+              console.log("====================================")
+              const res = await deleMultiRemind(vehicles)
+            } catch (error) {
+                console.log('====================================');
+                console.log("error delete remind", error);
+                console.log('====================================');
+            }
       }
 
       const viahicleGPS = viahiclesStore?.viahicleGPS
       // check trùng biển số phương tiện và lấy được biển số phương tiện trùng
 
-      const licensePlates = dataNewVehicles.map((item) => item.license_plate)
+      const licensePlatesAdd = dataNewVehiclesAdd?.map(
+        (item: any) => item.license_plate,
+      )
+      const licensePlatesRep = dataNewVehiclesRep?.map(
+        (item: any) => item.license_plate,
+      )
+
       const licensePlatesGPS = viahicleGPS?.map((item) => item.license_plate)
 
-      const duplicateLicensePlates = licensePlates.filter((item) =>
+      const duplicateLicensePlates1 = licensePlatesAdd?.filter((item: any) =>
         licensePlatesGPS?.includes(item),
       )
-      console.log("duplicateLicensePlates;", duplicateLicensePlates)
+      const duplicateLicensePlates2 = licensePlatesRep?.filter((item: any) =>
+        licensePlatesGPS?.includes(item),
+      )
+      // console.log("duplicateLicensePlates;", duplicateLicensePlates)
 
-      if (duplicateLicensePlates.length > 0) {
+      if (
+        duplicateLicensePlates1?.length > 0 ||
+        duplicateLicensePlates2?.length > 0
+      ) {
         api.message?.error(
-          `Biển số phương tiện ${duplicateLicensePlates.join(
+          `Biển số ${(duplicateLicensePlates1 || duplicateLicensePlates2).join(
             ", ",
           )} đã tồn tại trong danh sách phương tiện GPS`,
         )
@@ -103,8 +147,12 @@ const ImportExel: FC<{
       }
 
       setLoading(true)
-
-      await addViahicleExel(dataNewVehicles)
+      if (dataNewVehiclesAdd?.length > 0) {
+        await addViahicleExel(dataNewVehiclesAdd)
+      }
+      if (dataNewVehiclesRep?.length > 0) {
+        await addViahicleExel(dataNewVehiclesRep)
+      }
 
       const parsedRemindTireData = excelData.flatMap((item) =>
         item.remindTire
@@ -123,7 +171,7 @@ const ImportExel: FC<{
         try {
           await addTire(parsedRemindTireData[i])
         } catch (error) {
-          api.message?.error("Thêm lốp bị trùng series")
+          api.message?.success("Thêm lốp bị trùng series")
         }
       }
       const convertToUnix = (dateString: string): any => {
@@ -188,7 +236,9 @@ const ImportExel: FC<{
           vehicles: [item.license_plate?.toString()],
         }
       })
-
+      console.log("====================================")
+      console.log("formattedData >>>>>>>>>>>>>>>>>", formattedData)
+      console.log("====================================")
       for (let i = 0; i < formattedData.length; i++) {
         let cate_id = ""
         let typeFind = type.find(
@@ -215,8 +265,9 @@ const ImportExel: FC<{
     } catch (error) {
       console.log("error >>", error)
       api?.message?.error(
-        "Import thất bại seri lốp bị trùng hoặc biển số phương tiện bị trùng",
+        "Import thất bại seri lốp bị trùng hoặc biển số phương tiện bị trùng trong hệ thống !!",
       )
+      action?.closeModal?.()
     }
   }
 
@@ -239,7 +290,6 @@ const ImportExel: FC<{
           setExcelData={setExcelData}
           setIsUpload={setIsUpload}
           setExcelDefaultTime={setExcelDefaultTime}
-          setType={setType}
         />
       </div>
       <div className="actions flex justify-end">

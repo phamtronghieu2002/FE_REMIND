@@ -8,11 +8,13 @@ import { number } from "react-i18next/icu.macro"
 interface UploadExelProps {
   setIsUpload: any
   setExcelData: any
+  setExcelDefaultTime: any
 }
 
 const UploadExel: React.FC<UploadExelProps> = ({
   setIsUpload,
   setExcelData,
+  setExcelDefaultTime,
 }) => {
   const [tableColumns, setTableColumns] = useState<any[]>([])
   const [tableData, setTableData] = useState<any[]>([])
@@ -30,7 +32,7 @@ const UploadExel: React.FC<UploadExelProps> = ({
 
         const header = jsonData[0] // Hàng đầu tiên là tiêu đề cột
 
-        const indexBienSoXe = header.indexOf("Biển số phương tiện")
+        const indexBienSoXe = header.indexOf("Biển số xe")
         const indexLoaiCanhBao = header.indexOf("Loại cảnh báo")
         const indexPhoneNumber = header.indexOf("Số điện thoại")
         const indexName = header.indexOf("Họ và tên")
@@ -56,6 +58,16 @@ const UploadExel: React.FC<UploadExelProps> = ({
           if (col === "Lốp(Seri,size,brand)") acc.push(index)
           return acc
         }, [])
+        const indexDefaultTime = header.indexOf("Thời gian mặc định")
+        const indexExcelType: any = header.indexOf("Tùy chọn cập nhật")
+        if (indexExcelType === "" || indexExcelType === undefined) {
+          throw new Error(
+            "Invalid Excel type: Type cannot be empty or undefined",
+          )
+        }
+
+        const defaultTime = jsonData[1][indexDefaultTime] || "08:00"
+        setExcelDefaultTime(defaultTime)
         const result = jsonData
           .slice(1)
           .filter(
@@ -65,7 +77,7 @@ const UploadExel: React.FC<UploadExelProps> = ({
               row[indexBienSoXe] !== "",
           )
           .map((row) => ({
-            license_plate: row[indexBienSoXe],
+            license_plate: row[indexBienSoXe].toString().trim(),
             type: row[indexLoaiCanhBao],
             phoneNumber: row[indexPhoneNumber],
             name: row[indexName],
@@ -77,11 +89,11 @@ const UploadExel: React.FC<UploadExelProps> = ({
             remindDate: indicesDate.map((dateIndex: any, i: any) => {
               const timeIndex = indicesTime[i]
               let dateValue = row[dateIndex] || "" // Lấy giá trị từ cột "Thời gian nhắc nhở"
-              let timeValue = "08:00" // Mặc định là 08:00 nếu không có cột "Thời gian"
+              let timeValue = defaultTime // Mặc định là 08:00 nếu không có cột "Thời gian"
 
               // Nếu có cột "Thời gian" và giá trị không trống
               if (timeIndex !== null) {
-                timeValue = row[timeIndex] || "08:00"
+                timeValue = row[timeIndex] || defaultTime
               }
 
               // Chỉ ghép thời gian nếu "Thời gian nhắc nhở" có giá trị hợp lệ
@@ -93,6 +105,7 @@ const UploadExel: React.FC<UploadExelProps> = ({
               }
             }),
             remindTire: indicesSeri.map((index: number) => row[index]),
+            typeExcel: row[indexExcelType]?.trim() === "Thêm mới" ? "add" : row[indexExcelType]?.trim() === "Thay thế" ? "replace" : ""
           }))
         setExcelData(result)
 

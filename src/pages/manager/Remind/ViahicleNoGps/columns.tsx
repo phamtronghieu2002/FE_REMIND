@@ -52,8 +52,19 @@ const getColumnViahicleNoGPS = (
           children: record?.icons?.map((icon: any, index: number) => (
             <ModalCreateRemind
               type="update"
-              remindData={record}
-              button={<span key={index}> {icon?.icon}</span>}
+              remindData={icon?.remind}
+              button={
+                <span
+                  onClick={() => {
+                    setViahicleSelect([record])
+                  }}
+                  className="cursor-pointer"
+                  key={index}
+                >
+                  {" "}
+                  {icon?.icon}
+                </span>
+              }
             />
           )),
         }

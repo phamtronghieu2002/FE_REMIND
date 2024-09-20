@@ -129,6 +129,12 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
     }, [initImageURL])
 
     useEffect(() => {
+      if (initialValues?.remind_category_id == 6) {
+        setIsTireSelect(true)
+      }
+    }, [])
+
+    useEffect(() => {
       if (initImageURL) {
         const urls = initImageURL?.split(",")?.map(
           (url: string, index: number) =>
@@ -218,13 +224,18 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
             ? dayjs(Date.now()).add(initialValues?.cycle, "months")
             : initialValues?.expiration_time
 
-          const tire = initialValues?.tire
+          const tire = initialValues?.tire || initialValues?.tire_seri
           if (tire) {
             handleSelectViahicle(
               viahiclesStore?.viahiclesStore[0]?.license_plate,
             )
           }
-
+          console.log("====================================")
+          console.log(
+            "viahicleSelected",
+            viahiclesStore?.viahiclesStore[0]?.license_plate,
+          )
+          console.log("====================================")
           form.setFieldsValue({
             ...initialValues,
             expiration_time: dayjs(initialValues?.expiration_time),
@@ -240,10 +251,6 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
     }, [categories?.length])
 
     useEffect(() => {
-      console.log("====================================")
-      console.log(imageFiles.length, imageFilesUrl.length)
-      console.log("====================================")
-
       if (imageFiles.length > 10 || imageFilesUrl.length > 10) {
         api?.message?.error("Tải lên không quá 10 ảnh")
       }
@@ -378,7 +385,7 @@ const FormAddRemind = forwardRef<HTMLButtonElement, FormAddRemindProps>(
           </Form.Item>
 
           {/* chọn phương tiện */}
-          {(isTireSelect || initialValues?.remind_category_id == 6) && (
+          {isTireSelect && (
             <>
               <Form.Item
                 name="vehicles"

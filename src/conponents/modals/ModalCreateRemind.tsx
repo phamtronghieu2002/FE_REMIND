@@ -15,6 +15,7 @@ import {
   addRemind,
   addRemindGPS,
   finishRemind,
+  getRemindById,
   updateRemind,
 } from "../../apis/remindAPI"
 import { log } from "console"
@@ -22,8 +23,9 @@ import { createCategory } from "../../apis/categoryAPI"
 import moment from "moment"
 import { getTokenParam } from "../../utils/_param"
 import storage from "../../utils/storage"
+import { use } from "i18next"
 interface ModalCreateRemindProps {
-  remindId?: string
+  remindId?: number
   remindData?: any
   button: React.ReactNode
   isShow?: boolean
@@ -48,6 +50,9 @@ const Form: FC<{
 
   const handleSubmit = async (formData: any, callback: any, images?: any) => {
     try {
+      console.log('====================================');
+      console.log("form data >>", formData);
+      console.log('====================================');
       const cate_name = formData["cat_name"]
       if (cate_name) {
         const cat = await createCategory(cate_name, "", "")
@@ -106,6 +111,7 @@ const Form: FC<{
     setLoading(true)
     await updateRemind(remindData?.remind_id, images)
     action?.closeModal?.()
+    dispatch?.freshKey?.()
 
     api.message?.success("cập nhật nhắc nhở thành công")
     onReload?.()
@@ -272,7 +278,7 @@ const ModalCreateRemind: FC<ModalCreateRemindProps> = ({
   return (
     <ModalCView
       isShow={isShow}
-      isValidToOpen={viahiclesStore.viahiclesStore.length > 0}
+      isValidToOpen={viahiclesStore.viahiclesStore.length > 0 || remindData}
       button={button}
       title={getAction()?.title}
       children={(action) => (

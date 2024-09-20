@@ -77,7 +77,7 @@ const UploadExel: React.FC<UploadExelProps> = ({
               row[indexBienSoXe] !== "",
           )
           .map((row) => ({
-            license_plate: row[indexBienSoXe],
+            license_plate: row[indexBienSoXe].toString().trim(),
             type: row[indexLoaiCanhBao],
             phoneNumber: row[indexPhoneNumber],
             name: row[indexName],

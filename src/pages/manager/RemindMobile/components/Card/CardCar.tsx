@@ -29,6 +29,9 @@ const CardCar: FC<CardCarProps> = ({
   checked,
   onCheckChange,
 }) => {
+  console.log('====================================');
+  console.log("icons", icons);
+  console.log('====================================');
   return (
     <div className="item relative flex items-center min-h-16 border rounded-md mx-2 my-2">
       {showCheckbox && (
@@ -62,7 +65,7 @@ const CardCar: FC<CardCarProps> = ({
           <div className="flex-1 mr-10">
             <b>{license_plate}</b>
             {icons?.length > 0 && icons[0] !== null && (
-              <span> ({icons.filter((icon: any) => icon).join(" - ")})</span>
+              <span> ({icons.map((icon: any) => icon?.icon).join(" - ")})</span>
             )}
             <div className=" ">
               <p className="mb-1 mt-1">

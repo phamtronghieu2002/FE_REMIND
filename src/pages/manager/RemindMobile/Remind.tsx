@@ -43,7 +43,7 @@ const Remind: FC<RemindProps> = () => {
     if (tab === "1") {
       try {
         const res = await axios.get(
-          `https://sys01.midvietnam.net/api/v1/device/rows?keyword=${keyword}&offset=0&limit=50&type=1`,
+          `https://sys01.midvietnam.net/api/v1/device/rows?keyword=${keyword}&offset=0&limit=100000&type=1`,
           {
             headers: {
               Authorization: `Bearer ${storage.getAccessToken()}`,
@@ -76,10 +76,13 @@ const Remind: FC<RemindProps> = () => {
         const res = await getViahicle(keyword)
         const data = getData(res?.data)
         const remind_viahicles_NoGPS = await getIconRemindViahicleGPS()
+       
         data.map((item: any) => {
           item["icons"] = remind_viahicles_NoGPS.data[item.license_plate]
         })
-
+    console.log('====================================');
+    console.log("data", data);
+    console.log('====================================');
         setViahiclesNoGPS(data)
         dispatch?.setLoading?.(false)
       } catch (error) {

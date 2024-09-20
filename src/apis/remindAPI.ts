@@ -51,6 +51,10 @@ export const getTimeRemind = (id: number) => {
   return axiosInstance.get("/main/get-schedule/" + id)
 }
 
+export const getRemindById = (id: number) => {
+  return axiosInstance.get("/main/get-remind/" + id)
+}
+
 export const AutoFinishRemind = (id: number, tire_seri: any) => {
   const data = new FormData()
   data?.append("tire_seri", tire_seri)

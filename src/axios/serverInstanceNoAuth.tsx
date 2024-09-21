@@ -7,6 +7,9 @@ import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios"
 import { _const } from "../_constant"
 import storage from "../utils/storage"
 import { getTokenParam } from "../utils/_param"
+import { getAccessTokenService } from "../services/userServices"
+import { api } from "../_helper"
+import { _app } from "../utils/_app"
 
 const getTokenAuthHeader = (token: string) => `${token}`
 
@@ -32,8 +35,29 @@ const createNoAuthInstance = (API: string) => {
   const interceptorsRs = (response: AxiosResponse<any, any>) => {
     return response?.data
   }
-  const interceptorsRsError = (error: any) => {
-    return Promise.reject(error?.response?.data)
+  const interceptorsRsError = async (error: any) => {
+    const status = error?.response?.status
+    console.log("status >>>>", status)
+
+    if (status === 401 || status === 403) {
+      try {
+        const fb: any = await getAccessTokenService()
+        if (fb?.result == 1) {
+          const originalRequest = error.config
+          return serverInstanceNoAuth(originalRequest)
+        }
+      } catch (error: any) {
+        
+        if (error?.result == 2) {
+          api.message?.error(_const?.string?.message?.network)
+        }
+        if (error?.result == 3) {
+          _app?.logout?.()
+        }
+      }
+    }
+
+    return Promise.reject(error)
   }
 
   serverInstanceNoAuth.interceptors.request.use(

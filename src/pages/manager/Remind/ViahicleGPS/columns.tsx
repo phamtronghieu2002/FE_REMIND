@@ -3,6 +3,7 @@ import { Button, type TableColumnsType } from "antd"
 import DrawViahicle from "../../../../conponents/Draws/DrawViahicle"
 import { ViahicleType } from "../../../../interface/interface"
 import { SettingOutlined } from "@ant-design/icons"
+import ModalCreateRemind from "../../../../conponents/modals/ModalCreateRemind"
 
 const getColumnViahicleGPS = (
   setViahicleSelect: any,
@@ -40,9 +41,26 @@ const getColumnViahicleGPS = (
       dataIndex: "icons",
       key: "icons",
       render(value, record, index) {
-        return record?.icons?.map((icon: any,index:number) => (
-          <span key={index}> {icon.icon}</span>
-        ))
+        return {
+          children: record?.icons?.map((icon: any, index: number) => (
+            <ModalCreateRemind
+              type="update"
+              remindData={icon?.remind}
+              button={
+                <span
+                  onClick={() => {
+                    setViahicleSelect([record])
+                  }}
+                  className="cursor-pointer"
+                  key={index}
+                >
+                  {" "}
+                  {icon?.icon}
+                </span>
+              }
+            />
+          )),
+        }
       },
     },
     {

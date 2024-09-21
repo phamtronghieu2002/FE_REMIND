@@ -54,18 +54,24 @@ type REALTIME_PROMISE_DATA = "gps" | "info" | "alarm"
 
 export const _app = {
   logout: async () => {
-    removeFirebaseToken()
+    logoutService()
       .then((res) => {
+        console.log("=============chay vao=============")
         storage?.remove?.("fcmToken")
-        logoutService().then(() => {
-          storage.clearToken?.()
-          window.location.href = routeConfig?.login
-        })
+        storage.clearToken?.()
+        window.location.href = routeConfig?.login
+        removeFirebaseToken()
+          .then(() => {
+            console.log("====================================")
+            console.log("ok r")
+            console.log("====================================")
+          })
+          .catch((e) => {
+            console.log("error", e)
+          })
       })
       .catch((e) => {
-        console.log("====================================")
         console.log("error", e)
-        console.log("====================================")
       })
   },
 

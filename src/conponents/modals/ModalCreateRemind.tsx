@@ -50,9 +50,9 @@ const Form: FC<{
 
   const handleSubmit = async (formData: any, callback: any, images?: any) => {
     try {
-      console.log('====================================');
-      console.log("form data >>", formData);
-      console.log('====================================');
+      console.log("====================================")
+      console.log("form data >>", formData)
+      console.log("====================================")
       const cate_name = formData["cat_name"]
       if (cate_name) {
         const cat = await createCategory(cate_name, "", "")
@@ -278,7 +278,9 @@ const ModalCreateRemind: FC<ModalCreateRemindProps> = ({
   return (
     <ModalCView
       isShow={isShow}
-      isValidToOpen={viahiclesStore.viahiclesStore.length > 0 || remindData}
+      isValidToOpen={
+        viahiclesStore.viahiclesStore.length > 0 || remindData || false
+      }
       button={button}
       title={getAction()?.title}
       children={(action) => (

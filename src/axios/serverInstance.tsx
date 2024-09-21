@@ -39,12 +39,18 @@ function createInstance(API: string, timeout?: number) {
     if (status === 401 || status === 403) {
       try {
         const fb: any = await getAccessTokenService()
+
         if (fb?.result == 1) {
           const originalRequest = error.config
           return serverInstance(originalRequest)
         }
       } catch (error: any) {
+        console.log("error insstancce", error)
+
         if (error?.result == 2) {
+          storage.clearToken()
+          storage?.remove?.("fcmToken")
+
           api.message?.error(_const?.string?.message?.network)
         }
         if (error?.result == 3) {

@@ -5,6 +5,7 @@ import { _const } from "../_constant"
 import storage from "../utils/storage"
 import { serverInstance } from "../axios/serverInstance"
 import "./transfer"
+import { _app } from "../utils/_app"
 // import { USER_DATA } from "../data/old/user"
 
 export const loginService = async (body: any) => {
@@ -56,7 +57,8 @@ export const getAccessTokenService = async () => {
       })
     } catch (error: any) {
       const status = error?.result
-
+      console.log("error ne nha", error);
+      
       reject({
         result: status == undefined ? 2 : 3,
       })
